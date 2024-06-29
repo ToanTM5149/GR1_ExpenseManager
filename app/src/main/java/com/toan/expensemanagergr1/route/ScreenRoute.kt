@@ -15,4 +15,10 @@ object Screens {
     val Profile = Screen("/profile", Icons.Default.AccountCircle)
     val Login = Screen("/login", Icons.Default.Person)
     val SignUp = Screen("/signup", Icons.Default.Person)
+
+    val screenWithBottomNav = listOf(
+        Home.route,
+        AddExpense.route,
+        Profile.route
+    )
 }

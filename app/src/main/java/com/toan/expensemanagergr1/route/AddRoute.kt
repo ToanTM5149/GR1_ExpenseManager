@@ -2,9 +2,11 @@ package com.toan.expensemanagergr1.route
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import com.toan.expensemanagergr1.ui.screens.Login
 import com.toan.expensemanagergr1.ui.screens.Signup
 import com.toan.expensemanagergr1.ui.screens.user.AddExpense
@@ -14,7 +16,25 @@ import com.toan.expensemanagergr1.ui.screens.user.TotalInfo
 @Composable
 fun AddRoute(navController: NavHostController, modifier: Modifier = Modifier) {
 
-    NavHost(navController = navController, startDestination = Screens.Home.route, modifier = modifier) {
+    NavHost(navController = navController, startDestination = "/user", modifier = modifier) {
+        userRoutes(navController)
+        authRoutes(navController)
+    }
+}
+
+fun NavGraphBuilder.authRoutes(navController: NavHostController) {
+    navigation(startDestination = Screens.Login.route, route = "/auth") {
+        composable(route = Screens.Login.route) {
+            Login(navController)
+        }
+        composable(route = Screens.SignUp.route) {
+            Signup(navController)
+        }
+    }
+}
+
+fun NavGraphBuilder.userRoutes(navController: NavHostController) {
+    navigation(startDestination = Screens.Home.route, route = "/user") {
         composable(route = Screens.Home.route) {
             TotalInfo(navController)
         }
@@ -23,12 +43,6 @@ fun AddRoute(navController: NavHostController, modifier: Modifier = Modifier) {
         }
         composable(route = Screens.Profile.route) {
             Profile(navController)
-        }
-        composable(route = Screens.Login.route) {
-            Login(navController)
-        }
-        composable(route = Screens.SignUp.route) {
-            Signup(navController)
         }
     }
 }

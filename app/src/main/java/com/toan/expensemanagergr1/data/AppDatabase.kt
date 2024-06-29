@@ -12,7 +12,7 @@ import com.toan.expensemanagergr1.data.model.ExpenseEntity
 import com.toan.expensemanagergr1.data.model.UserEntity
 
 
-@Database(entities = [ExpenseEntity::class, UserEntity::class], version = 2)
+@Database(entities = [ExpenseEntity::class, UserEntity::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun expenseDao(): ExpenseDao
     abstract fun userDao(): UserDao
@@ -30,26 +30,17 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_2_3)
                     .build()
                 INSTANCE = instance
                 instance
             }
         }
 
-        private val MIGRATION_1_2 = object : Migration(1, 2) {
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL(
-                    """
-                    CREATE TABLE IF NOT EXISTS user_table (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                        username TEXT NOT NULL,
-                        password TEXT NOT NULL,
-                        role TEXT NOT NULL,
-                        created_at INTEGER NOT NULL
-                    )
-                    """
-                )
+                database.execSQL("ALTER TABLE user_table ADD COLUMN phone TEXT NOT NULL DEFAULT ''")
+                database.execSQL("ALTER TABLE user_table ADD COLUMN email TEXT NOT NULL DEFAULT ''")
             }
         }
     }
