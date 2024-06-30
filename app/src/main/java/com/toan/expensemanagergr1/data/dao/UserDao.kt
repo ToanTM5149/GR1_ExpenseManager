@@ -23,4 +23,7 @@ interface UserDao {
 
     @Delete
     suspend fun deleteUser(userEntity: UserEntity)
+
+    @Query("select * from user_table where username = :username and password = :password")
+    suspend fun getUserByUsernameAndPassword(username: String, password: String): UserEntity?
 }

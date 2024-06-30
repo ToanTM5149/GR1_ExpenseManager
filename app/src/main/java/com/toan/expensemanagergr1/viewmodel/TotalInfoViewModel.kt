@@ -1,16 +1,33 @@
 package com.toan.expensemanagergr1.viewmodel
 
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.toan.expensemanagergr1.R
 import com.toan.expensemanagergr1.widget.Ultis
 import com.toan.expensemanagergr1.data.AppDatabase
 import com.toan.expensemanagergr1.data.dao.ExpenseDao
 import com.toan.expensemanagergr1.data.model.ExpenseEntity
+import com.toan.expensemanagergr1.data.model.UserWithExpenses
+import kotlinx.coroutines.launch
 
-class TotalInfoViewModel(dao : ExpenseDao) : ViewModel() {
+class TotalInfoViewModel(private val dao : ExpenseDao) : ViewModel() {
+
     val expenses = dao.getAllExpense()
+
+    private val _userWithExpenses = MutableLiveData<UserWithExpenses>()
+    val userWithExpenses: LiveData<UserWithExpenses> get() = _userWithExpenses
+
+    fun loadExpenses(userId: Int) {
+        viewModelScope.launch {
+            val data = dao.getUserWithExpenses(userId)
+            _userWithExpenses.postValue(data)
+        }
+    }
 
     fun getBalance(list: List<ExpenseEntity>) : String{
         var total = 0.0
@@ -54,6 +71,12 @@ class TotalInfoViewModel(dao : ExpenseDao) : ViewModel() {
         }
         return R.drawable.ic_upwork
     }
+
+    fun getUserWithExpenses(userId: Int): LiveData<UserWithExpenses> = liveData {
+        val data = dao.getUserWithExpenses(userId)
+        emit(data)
+    }
+
 }
 
 class TotalInfoViewModelFactory(private val context: Context) : ViewModelProvider.Factory{

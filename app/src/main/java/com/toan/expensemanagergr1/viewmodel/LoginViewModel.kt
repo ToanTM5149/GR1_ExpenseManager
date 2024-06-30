@@ -9,12 +9,16 @@ import com.toan.expensemanagergr1.data.model.UserEntity
 
 class LoginViewModel(val dao : UserDao) : ViewModel() {
 
-    suspend fun addUser(userEntity: UserEntity) : Boolean {
+    suspend fun loginUser(username: String, password: String): Result<Int> {
         return try {
-            dao.insertUser(userEntity)
-            true
-        } catch (ex: Throwable) {
-            false
+            val user = dao.getUserByUsernameAndPassword(username, password)
+            if (user != null) {
+                Result.success(user.id)
+            } else {
+                Result.failure(Exception("Người dùng không tồn tại hoặc sai thông tin đăng nhập"))
+            }
+        } catch (ex: Exception) {
+            Result.failure(ex)
         }
     }
 }

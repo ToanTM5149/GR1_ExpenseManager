@@ -14,5 +14,4 @@ object Ultis {
         return String.format("%.2f", double)
     }
 
-
 }

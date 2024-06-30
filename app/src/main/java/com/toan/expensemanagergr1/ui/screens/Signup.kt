@@ -1,7 +1,9 @@
 package com.toan.expensemanagergr1.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,6 +56,9 @@ import com.toan.expensemanagergr1.ui.screens.user.DataForm
 import com.toan.expensemanagergr1.ui.theme.Zinc
 import com.toan.expensemanagergr1.ui.theme.Zinc
 import com.toan.expensemanagergr1.ui.theme.Zinc1
+import com.toan.expensemanagergr1.viewmodel.SignupViewModel
+import com.toan.expensemanagergr1.viewmodel.SignupViewModelFactory
+import com.toan.expensemanagergr1.widget.CustomOutlinedTextField
 import com.toan.expensemanagergr1.widget.ExpenseTextView
 import kotlinx.coroutines.launch
 
@@ -80,7 +87,9 @@ fun Signup(navController: NavController) {
             ){
                 Column {
                     ExpenseTextView(text = "Xin chào!", fontSize = 30.sp, color = Color.White,
-                        modifier = Modifier.padding(top = 30.dp).shadow(1.dp))
+                        modifier = Modifier
+                            .padding(top = 30.dp)
+                            .shadow(1.dp))
                     ExpenseTextView(text = "Chúc bạn một ngày tốt lành!", fontSize = 25.sp, color = Color.White, fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .shadow(1.dp)
@@ -94,16 +103,22 @@ fun Signup(navController: NavController) {
                     top.linkTo(nameRow.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                })
+                }, navController)
 
         }
     }
 }
 
 @Composable
-fun SignupForm(modifier: Modifier) {
+fun SignupForm(modifier: Modifier, navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val viewModel: SignupViewModel = remember {
+        SignupViewModelFactory(context).create(SignupViewModel::class.java)
+    }
+    val coroutineScope = rememberCoroutineScope()
 
     Column (modifier = modifier
         .padding(16.dp)
@@ -120,72 +135,50 @@ fun SignupForm(modifier: Modifier) {
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(bottom = 8.dp))
-        OutlinedTextField(
-            value = username, onValueChange = {username = it},
-            label = { Text(text = "Tên người dùng")},
-            shape = RoundedCornerShape(20.dp),
-            colors = TextFieldDefaults.colors(
-                focusedLeadingIconColor = Zinc,
-                unfocusedLeadingIconColor = Zinc,
-                focusedLabelColor = Zinc,
-                unfocusedLabelColor = Zinc,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedIndicatorColor = Zinc,
-                unfocusedIndicatorColor = Zinc,
-                unfocusedPlaceholderColor = Zinc
-            ), leadingIcon = {
+        CustomOutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = "Tên người dùng",
+            leadingIcon = {
                 Icon(imageVector = Icons.Default.Person, contentDescription = "Username")
-            },
-            modifier = Modifier
-                .fillMaxWidth()
+            }
         )
 
-        OutlinedTextField(
-            value = password, onValueChange = {password = it},
-            label = { Text(text = "Mật khẩu")},
-            shape = RoundedCornerShape(20.dp),
-            colors = TextFieldDefaults.colors(
-                focusedLeadingIconColor = Zinc,
-                unfocusedLeadingIconColor = Zinc,
-                focusedLabelColor = Zinc,
-                unfocusedLabelColor = Zinc,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedIndicatorColor = Zinc,
-                unfocusedIndicatorColor = Zinc,
-                unfocusedPlaceholderColor = Zinc
-            ), leadingIcon = {
+        CustomOutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = "Mật khẩu",
+            leadingIcon = {
                 Icon(imageVector = Icons.Default.Lock, contentDescription = "Password")
             },
-            modifier = Modifier
-                .fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation()
         )
 
-        OutlinedTextField(
-            value = password, onValueChange = {password = it},
-            label = { Text(text = "Nhập lại mật khẩu")},
-            shape = RoundedCornerShape(20.dp),
-            colors = TextFieldDefaults.colors(
-                focusedLeadingIconColor = Zinc,
-                unfocusedLeadingIconColor = Zinc,
-                focusedLabelColor = Zinc,
-                unfocusedLabelColor = Zinc,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedIndicatorColor = Zinc,
-                unfocusedIndicatorColor = Zinc,
-                unfocusedPlaceholderColor = Zinc
-            ), leadingIcon = {
+        CustomOutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = "Nhập lại mật khẩu",
+            leadingIcon = {
                 Icon(imageVector = Icons.Default.Lock, contentDescription = "Password")
             },
-            modifier = Modifier
-                .fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation()
         )
 
-        Button(onClick = {},
+        Button(onClick = {
+            if (password == confirmPassword) {
+                coroutineScope.launch {
+                    val isSignupSuccessful = viewModel.signupUser(username, password, "user", "", "")
+                    if (isSignupSuccessful) {
+                        Toast.makeText(context, "Đăng ký thành công!", Toast.LENGTH_SHORT).show()
+                        navController.navigate("/home")
+                    } else {
+                        Toast.makeText(context, "Đăng ký thất bại!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                Toast.makeText(context, "Mật khẩu không khớp!", Toast.LENGTH_SHORT).show()
+            }
+        },
             colors = ButtonDefaults.buttonColors(Zinc),
             contentPadding = PaddingValues(start = 60.dp, end = 60.dp, top = 8.dp, bottom = 8.dp),
             modifier = Modifier
@@ -200,7 +193,11 @@ fun SignupForm(modifier: Modifier) {
             Spacer(modifier = Modifier.size(2.dp))
             ExpenseTextView(text = "Đăng nhập", fontSize = 16.sp, color = Zinc, fontStyle = FontStyle.Italic,
                 modifier = Modifier
-                    .padding(top = 10.dp))
+                    .padding(top = 10.dp)
+                    .clickable {
+                        navController.navigate("/login")
+                    }
+            )
         }
     }
 }

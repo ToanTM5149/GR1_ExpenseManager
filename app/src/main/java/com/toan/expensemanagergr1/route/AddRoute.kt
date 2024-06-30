@@ -16,7 +16,7 @@ import com.toan.expensemanagergr1.ui.screens.user.TotalInfo
 @Composable
 fun AddRoute(navController: NavHostController, modifier: Modifier = Modifier) {
 
-    NavHost(navController = navController, startDestination = "/user", modifier = modifier) {
+    NavHost(navController = navController, startDestination = "/auth", modifier = modifier) {
         userRoutes(navController)
         authRoutes(navController)
     }

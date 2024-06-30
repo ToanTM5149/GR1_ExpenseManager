@@ -1,5 +1,6 @@
 package com.toan.expensemanagergr1.ui.screens.user
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -17,7 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import com.toan.expensemanagergr1.widget.ExpenseTextView
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,7 +98,7 @@ fun TotalInfo(navController: NavController) {
                     end.linkTo(parent.end)
                     bottom.linkTo(parent.bottom)
                     height = Dimension.fillToConstraints
-                }, list = state.value, viewModel)
+                }, viewModel)
 
         }
     }
@@ -145,29 +149,43 @@ fun CardItem(modifier: Modifier, balance: String, income: String, expenses: Stri
 }
 
 @Composable
-fun TransactionList(modifier: Modifier, list: List<ExpenseEntity>, viewModel: TotalInfoViewModel) {
-    LazyColumn (modifier = modifier.padding(horizontal = 16.dp)) {
-        item {
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)) {
-                ExpenseTextView(text = "Giao dịch gần đây", fontSize = 20.sp)
-                ExpenseTextView(text = "Xem tất cả", fontSize = 16.sp,
-                    modifier = Modifier.align(Alignment.CenterEnd)
-                )
+fun TransactionList(modifier: Modifier, viewModel: TotalInfoViewModel) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val userId = sharedPreferences.getInt("user_id", -1)
+
+    LaunchedEffect(userId) {
+        viewModel.loadExpenses(userId)
+    }
+    val userWithExpenses by viewModel.userWithExpenses.observeAsState()
+
+
+
+    Column(modifier = modifier.padding(horizontal = 16.dp)) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)) {
+            ExpenseTextView(text = "Giao dịch gần đây", fontSize = 20.sp)
+            ExpenseTextView(text = "Xem tất cả", fontSize = 16.sp,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
+        }
+        LazyColumn {
+            userWithExpenses?.expenses?.let { expenseEntities ->
+                items(expenseEntities) { item ->
+                    TransactionItem(
+                        title = item.title,
+                        amount = item.amount.toString(),
+                        icon = viewModel.getItemIcon(item),
+                        date = item.date.toString(),
+                        color = if (item.type == "Thu nhập") Color.Green else Color.Red
+                    )
+                }
             }
         }
-        items(list) {item ->
-            TransactionItem(
-                title = item.title,
-                amount = item.amount.toString(),
-                icon = viewModel.getItemIcon(item),
-                date = item.date.toString(),
-                color = if (item.type == "Thu nhập") Color.Green else Color.Red)
-        }
-
     }
 }
+
 
 @Composable
 fun CardRowItem(modifier: Modifier, title: String, amount: String, image: Int) {

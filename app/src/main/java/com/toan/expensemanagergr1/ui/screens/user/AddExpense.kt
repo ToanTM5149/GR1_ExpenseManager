@@ -1,7 +1,8 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.toan.expensemanagergr1.ui.screens.user
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,11 +60,14 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AddExpense(navController: NavController) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val userId = sharedPreferences.getInt("user_id", -1)
     val viewModel = AddExpenseViewModelFactory(LocalContext.current).create(AddExpenseViewModel::class.java)
     val coroutineScope = rememberCoroutineScope()
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (nameRow, list, card, topBar) = createRefs()
+            val (nameRow, card, topBar) = createRefs()
             Image(painter = painterResource(id = R.drawable.ic_topbar), contentDescription = null,
                 colorFilter = ColorFilter.tint(Zinc1),
                 modifier = Modifier.constrainAs(topBar) {
@@ -111,17 +115,17 @@ fun AddExpense(navController: NavController) {
                 }, onAddExpenseClick = {
                 coroutineScope.launch {
                     if (viewModel.addExpense(it)) {
-                        navController.popBackStack()
+                        navController.navigate("/home")
                     }
                 }
-            })
+            }, userId)
         }
     }
 }
 
 
 @Composable
-fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Unit) {
+fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Unit, userId: Int) {
     val name = remember {
         mutableStateOf("")
     }
@@ -205,7 +209,8 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
                 amount.value.toDoubleOrNull() ?: 0.0,
                 date.value,
                 category.value,
-                type.value
+                type.value,
+                userId = userId
             )
             onAddExpenseClick(model)
         },
