@@ -1,11 +1,11 @@
 package com.toan.expensemanagergr1.viewmodel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.toan.expensemanagergr1.R
 import com.toan.expensemanagergr1.widget.Ultis
@@ -17,48 +17,62 @@ import kotlinx.coroutines.launch
 
 class TotalInfoViewModel(private val dao : ExpenseDao) : ViewModel() {
 
-    val expenses = dao.getAllExpense()
-
     private val _userWithExpenses = MutableLiveData<UserWithExpenses>()
     val userWithExpenses: LiveData<UserWithExpenses> get() = _userWithExpenses
+
+    private val _balance = MutableLiveData<String>()
+    val balance: LiveData<String> get() = _balance
+
+    private val _totalExpense = MutableLiveData<String>()
+    val totalExpense: LiveData<String> get() = _totalExpense
+
+    private val _totalIncome = MutableLiveData<String>()
+    val totalIncome: LiveData<String> get() = _totalIncome
 
     fun loadExpenses(userId: Int) {
         viewModelScope.launch {
             val data = dao.getUserWithExpenses(userId)
             _userWithExpenses.postValue(data)
+            getBalance(userId)
+            getTotalExpense(userId)
+            getTotalIncome(userId)
         }
     }
 
-    fun getBalance(list: List<ExpenseEntity>) : String{
+    suspend fun getBalance(userId: Int) {
+        val expenses = dao.getUserWithExpenses(userId)
+
         var total = 0.0
-        list.forEach {
+        expenses.expenses.forEach {
             if (it.type == "Thu nhập") {
                 total += it.amount
             } else {
                 total -= it.amount
             }
         }
-        return "$ ${Ultis.formatToDecimalValue(total)}"
+        _balance.postValue("$ ${Ultis.formatToDecimalValue(total)}")
     }
 
-    fun getTotalExpense(list: List<ExpenseEntity>) : String {
+    suspend fun getTotalExpense(userId: Int) {
+        val expenses = dao.getUserWithExpenses(userId)
         var total = 0.0
-        list.forEach {
+        expenses.expenses.forEach {
             if (it.type == "Chi phí") {
                 total += it.amount
             }
         }
-        return "$ ${Ultis.formatToDecimalValue(total)}"
+        _totalExpense.postValue("$ ${Ultis.formatToDecimalValue(total)}")
     }
 
-    fun getTotalIncome(list: List<ExpenseEntity>) : String {
+    suspend fun getTotalIncome(userId: Int){
+        val expenses = dao.getUserWithExpenses(userId)
         var total = 0.0
-        list.forEach {
+        expenses.expenses.forEach {
             if (it.type == "Thu nhập") {
                 total += it.amount
             }
         }
-        return "$ ${Ultis.formatToDecimalValue(total)}"
+        _totalIncome.postValue("$ ${Ultis.formatToDecimalValue(total)}").toString()
     }
 
     fun getItemIcon(item : ExpenseEntity) : Int {
@@ -72,11 +86,13 @@ class TotalInfoViewModel(private val dao : ExpenseDao) : ViewModel() {
         return R.drawable.ic_upwork
     }
 
-    fun getUserWithExpenses(userId: Int): LiveData<UserWithExpenses> = liveData {
-        val data = dao.getUserWithExpenses(userId)
-        emit(data)
+    fun deleteExpense(expense: ExpenseEntity) {
+        viewModelScope.launch {
+            dao.deleteExpense(expense)
+            // Refresh the data
+            _userWithExpenses.value?.let { loadExpenses(it.user.id) }
+        }
     }
-
 }
 
 class TotalInfoViewModelFactory(private val context: Context) : ViewModelProvider.Factory{

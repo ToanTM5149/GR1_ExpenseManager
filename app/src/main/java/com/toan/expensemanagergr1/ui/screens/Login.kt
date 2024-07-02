@@ -58,10 +58,8 @@ import com.toan.expensemanagergr1.widget.CustomOutlinedTextField
 import com.toan.expensemanagergr1.widget.ExpenseTextView
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun Login(navController: NavController) {
-
 
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -101,7 +99,6 @@ fun Login(navController: NavController) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }, navController)
-
         }
     }
 }

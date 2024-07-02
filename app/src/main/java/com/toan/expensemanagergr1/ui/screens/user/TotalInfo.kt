@@ -12,16 +12,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import com.toan.expensemanagergr1.widget.ExpenseTextView
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,20 +47,22 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.toan.expensemanagergr1.R
-import com.toan.expensemanagergr1.data.model.ExpenseEntity
 import com.toan.expensemanagergr1.ui.theme.Zinc
 import com.toan.expensemanagergr1.ui.theme.Zinc1
 import com.toan.expensemanagergr1.viewmodel.TotalInfoViewModel
 import com.toan.expensemanagergr1.viewmodel.TotalInfoViewModelFactory
+import com.toan.expensemanagergr1.widget.Ultis
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun TotalInfo(navController: NavController) {
     val viewModel: TotalInfoViewModel =
         TotalInfoViewModelFactory(LocalContext.current).create(TotalInfoViewModel::class.java)
+
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (nameRow, list, card, topBar, add) = createRefs()
+            val (nameRow, list, card, topBar) = createRefs()
             Image(painter = painterResource(id = R.drawable.ic_topbar), contentDescription = null,
                 colorFilter = ColorFilter.tint(Zinc1),
                 modifier = Modifier.constrainAs(topBar) {
@@ -79,16 +90,12 @@ fun TotalInfo(navController: NavController) {
                     modifier = Modifier.align(Alignment.CenterEnd)
                 )
             }
-            val state = viewModel.expenses.collectAsState(initial = emptyList())
-            val expenses = viewModel.getTotalExpense(state.value)
-            val income = viewModel.getTotalIncome(state.value)
-            val balance = viewModel.getBalance(state.value)
 
             CardItem(modifier = Modifier.constrainAs(card) {
                 top.linkTo(nameRow.bottom)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
-            }, balance, income, expenses)
+            }, viewModel)
 
             TransactionList(modifier = Modifier
                 .fillMaxWidth()
@@ -105,7 +112,19 @@ fun TotalInfo(navController: NavController) {
 }
 
 @Composable
-fun CardItem(modifier: Modifier, balance: String, income: String, expenses: String) {
+fun CardItem(modifier: Modifier, viewModel: TotalInfoViewModel) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val userId = sharedPreferences.getInt("user_id", -1)
+
+    val balance by viewModel.balance.observeAsState("0")
+    val expenses by viewModel.totalExpense.observeAsState("0")
+    val income by viewModel.totalIncome.observeAsState("0")
+
+    LaunchedEffect(userId) {
+        viewModel.loadExpenses(userId)
+    }
+
     Column (modifier = modifier
         .padding(16.dp)
         .fillMaxWidth()
@@ -157,9 +176,8 @@ fun TransactionList(modifier: Modifier, viewModel: TotalInfoViewModel) {
     LaunchedEffect(userId) {
         viewModel.loadExpenses(userId)
     }
+
     val userWithExpenses by viewModel.userWithExpenses.observeAsState()
-
-
 
     Column(modifier = modifier.padding(horizontal = 16.dp)) {
         Box(modifier = Modifier
@@ -170,6 +188,7 @@ fun TransactionList(modifier: Modifier, viewModel: TotalInfoViewModel) {
                 modifier = Modifier.align(Alignment.CenterEnd)
             )
         }
+        Spacer(modifier = Modifier.size(10.dp))
         LazyColumn {
             userWithExpenses?.expenses?.let { expenseEntities ->
                 items(expenseEntities) { item ->
@@ -177,8 +196,10 @@ fun TransactionList(modifier: Modifier, viewModel: TotalInfoViewModel) {
                         title = item.title,
                         amount = item.amount.toString(),
                         icon = viewModel.getItemIcon(item),
-                        date = item.date.toString(),
-                        color = if (item.type == "Thu nhập") Color.Green else Color.Red
+                        date = Ultis.formatDateToHumanReadableForm(item.date),
+                        color = if (item.type == "Thu nhập") Color.Green else Color.Red,
+                        onDeleteClick = { viewModel.deleteExpense(item)},
+                        onUpdateClick = {}
                     )
                 }
             }
@@ -200,26 +221,50 @@ fun CardRowItem(modifier: Modifier, title: String, amount: String, image: Int) {
 }
 
 @Composable
-fun TransactionItem(title: String, amount: String, icon: Int, date: String, color: Color) {
+fun TransactionItem(title: String, amount: String, icon: Int, date: String, color: Color,
+                    onDeleteClick: () -> Unit,
+                    onUpdateClick: () -> Unit
+) {
     Box(modifier = Modifier.fillMaxWidth()){
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Image(painter = painterResource(id = icon),
-                contentDescription = null)
+                contentDescription = null,
+                modifier = Modifier
+                    .width(30.dp)
+                    .height(30.dp)
+            )
             Spacer(modifier = Modifier.size(8.dp))
-            Column {
+            Column (modifier = Modifier.weight(1f)) {
                 ExpenseTextView(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 ExpenseTextView(text = date, fontSize = 12.sp)
 
             }
         }
-        ExpenseTextView(text = amount, fontSize = 20.sp, modifier = Modifier.align(Alignment.CenterEnd),
+        Spacer(modifier = Modifier.size(42.dp))
+        ExpenseTextView(text = amount, fontSize = 16.sp, modifier = Modifier.padding(top = 10.dp, start = 180.dp, end = 100.dp),
             color = color, fontWeight = FontWeight.SemiBold
         )
+        Spacer(modifier = Modifier.size(8.dp))
+        Row (modifier = Modifier.padding(top = 0.dp, start = 285.dp, end = 10.dp)) {
+            IconButton(onClick = onUpdateClick) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Update",
+                    tint = Zinc
+                )
+            }
+            IconButton(onClick = onDeleteClick) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = Zinc
+                )
+            }
+        }
     }
 }
-
-@Composable
 @Preview(showBackground = true)
+@Composable
 fun PreviewHomeScreen(){
     TotalInfo(rememberNavController())
 }

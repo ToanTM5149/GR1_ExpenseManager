@@ -24,12 +24,13 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.OutlinedTextField
+import com.toan.expensemanagergr1.widget.CustomOutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,9 +61,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AddExpense(navController: NavController) {
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-    val userId = sharedPreferences.getInt("user_id", -1)
+
     val viewModel = AddExpenseViewModelFactory(LocalContext.current).create(AddExpenseViewModel::class.java)
     val coroutineScope = rememberCoroutineScope()
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -86,7 +85,8 @@ fun AddExpense(navController: NavController) {
             ){
                 Image(painter = painterResource(id = R.drawable.ic_chevron_left),
                     contentDescription = null,
-                    modifier = Modifier.align(Alignment.CenterStart)
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
                         .clickable {
                             navController.navigate("/home") {
                                 popUpTo(0)
@@ -118,32 +118,24 @@ fun AddExpense(navController: NavController) {
                         navController.navigate("/home")
                     }
                 }
-            }, userId)
+            })
         }
     }
 }
 
 
 @Composable
-fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Unit, userId: Int) {
-    val name = remember {
-        mutableStateOf("")
-    }
-    val amount = remember {
-        mutableStateOf("")
-    }
-    val date = remember {
-        mutableStateOf(0L)
-    }
-    val dateDialogVisibility = remember {
-        mutableStateOf(false)
-    }
-    val category = remember {
-        mutableStateOf("")
-    }
-    val type = remember {
-        mutableStateOf("")
-    }
+fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Unit) {
+    val name = remember { mutableStateOf("") }
+    val amount = remember { mutableStateOf("") }
+    val date = remember { mutableLongStateOf(0L) }
+    val dateDialogVisibility = remember { mutableStateOf(false) }
+    val category = remember { mutableStateOf("") }
+    val type = remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val userId = sharedPreferences.getInt("user_id", -1)
+
     Column (modifier = modifier
         .padding(16.dp)
         .fillMaxWidth()
@@ -157,14 +149,14 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
     {
         ExpenseTextView(text = "Name", fontSize = 14.sp)
         Spacer(modifier = Modifier.size(4.dp))
-        OutlinedTextField(value = name.value, onValueChange = {
+        CustomOutlinedTextField(value = name.value, onValueChange = {
             name.value = it
         }, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.size(8.dp))
 
         ExpenseTextView(text = "Amount", fontSize = 14.sp)
         Spacer(modifier = Modifier.size(4.dp))
-        OutlinedTextField(
+        CustomOutlinedTextField(
             value = amount.value,
             onValueChange = {amount.value = it},
             modifier = Modifier.fillMaxWidth())
@@ -173,7 +165,7 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
         //date
         ExpenseTextView(text = "Date", fontSize = 14.sp)
         Spacer(modifier = Modifier.size(4.dp))
-        OutlinedTextField(
+        CustomOutlinedTextField(
             value = if (date.value == 0L) "" else Ultis.formatDateToHumanReadableForm(date.value),
             onValueChange = {},
             modifier = Modifier
@@ -233,7 +225,6 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
     }
 }
 
-
 @Composable
 fun ExpenseDatePickerDialog(
     onDateSelected: (date: Long) -> Unit,
@@ -242,11 +233,12 @@ fun ExpenseDatePickerDialog(
     val datePickerState = rememberDatePickerState()
     val selectedDate = datePickerState.selectedDateMillis ?: 0L
     DatePickerDialog(onDismissRequest = { onDismiss() },
-        confirmButton = { TextButton(onClick = {onDateSelected(selectedDate)} ) {
+        confirmButton = {
+            TextButton(onClick = {onDateSelected(selectedDate)} ) {
             ExpenseTextView(text = "Confirm")
         }},
         dismissButton = {
-            TextButton(onClick = { onDateSelected(selectedDate)}) {
+            TextButton(onClick = { onDismiss()}) {
                 ExpenseTextView(text = "Cancel")
             }
         }) {

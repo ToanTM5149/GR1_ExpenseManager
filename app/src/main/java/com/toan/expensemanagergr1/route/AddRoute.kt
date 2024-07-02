@@ -19,6 +19,7 @@ fun AddRoute(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(navController = navController, startDestination = "/auth", modifier = modifier) {
         userRoutes(navController)
         authRoutes(navController)
+        adminRoutes(navController)
     }
 }
 
@@ -44,5 +45,10 @@ fun NavGraphBuilder.userRoutes(navController: NavHostController) {
         composable(route = Screens.Profile.route) {
             Profile(navController)
         }
+    }
+}
+fun NavGraphBuilder.adminRoutes(navController: NavHostController) {
+    navigation(startDestination = Screens.Home.route, route = "/admin") {
+
     }
 }

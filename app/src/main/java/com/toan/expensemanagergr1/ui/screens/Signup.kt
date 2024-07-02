@@ -1,5 +1,6 @@
 package com.toan.expensemanagergr1.ui.screens
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -165,18 +166,21 @@ fun SignupForm(modifier: Modifier, navController: NavController) {
         )
 
         Button(onClick = {
-            if (password == confirmPassword) {
-                coroutineScope.launch {
-                    val isSignupSuccessful = viewModel.signupUser(username, password, "user", "", "")
-                    if (isSignupSuccessful) {
-                        Toast.makeText(context, "Đăng ký thành công!", Toast.LENGTH_SHORT).show()
+            coroutineScope.launch {
+                val result = viewModel.signupUser(username, password, "user", "", "")
+                result.fold(
+                    onSuccess = { id ->
+                        val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                        with(sharedPreferences.edit()) {
+                            putInt("user_id", id)
+                            apply()
+                        }
                         navController.navigate("/home")
-                    } else {
-                        Toast.makeText(context, "Đăng ký thất bại!", Toast.LENGTH_SHORT).show()
+                    },
+                    onFailure = {
+                        Toast.makeText(context, "Người dùng đã tồn tại", Toast.LENGTH_SHORT).show()
                     }
-                }
-            } else {
-                Toast.makeText(context, "Mật khẩu không khớp!", Toast.LENGTH_SHORT).show()
+                )
             }
         },
             colors = ButtonDefaults.buttonColors(Zinc),

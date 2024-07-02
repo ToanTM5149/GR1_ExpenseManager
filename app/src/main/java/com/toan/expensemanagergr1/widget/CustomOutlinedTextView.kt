@@ -3,6 +3,7 @@ package com.toan.expensemanagergr1.widget
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -16,29 +17,45 @@ import com.toan.expensemanagergr1.ui.theme.Zinc
 fun CustomOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
-    leadingIcon: @Composable (() -> Unit),
+    label: String = "",
+    leadingIcon: @Composable (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isError: Boolean = false,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    singleLine: Boolean = false,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(text = label) },
         shape = RoundedCornerShape(20.dp),
-        colors = TextFieldDefaults.colors(
+        colors = OutlinedTextFieldDefaults.colors(
             focusedLeadingIconColor = Zinc,
             unfocusedLeadingIconColor = Zinc,
             focusedLabelColor = Zinc,
             unfocusedLabelColor = Zinc,
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,
-            focusedIndicatorColor = Zinc,
-            unfocusedIndicatorColor = Zinc,
-            unfocusedPlaceholderColor = Zinc
+            focusedBorderColor = Zinc,
+            unfocusedBorderColor = Zinc,
+            cursorColor = Zinc,
+            errorCursorColor = Color.Red,
+            errorLeadingIconColor = Color.Red,
+            errorLabelColor = Color.Red,
+            errorContainerColor = Color.White,
+            errorBorderColor = Color.Red
         ),
         leadingIcon = leadingIcon,
         visualTransformation = visualTransformation,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        isError = isError,
+        enabled = enabled,
+        readOnly = readOnly,
+        singleLine = singleLine,
+        maxLines = maxLines
     )
 }
+

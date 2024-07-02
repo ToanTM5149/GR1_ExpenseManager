@@ -9,7 +9,7 @@ import com.toan.expensemanagergr1.data.model.UserEntity
 
 class SignupViewModel(private val dao: UserDao) : ViewModel() {
 
-    suspend fun signupUser(username: String, password: String, role: String, phone: String, email: String): Boolean {
+    suspend fun signupUser(username: String, password: String, role: String, phone: String, email: String): Result<Int> {
         return try {
             val existingUser = dao.getUserByUsernameAndPassword(username, password)
             if (existingUser == null) {
@@ -22,12 +22,13 @@ class SignupViewModel(private val dao: UserDao) : ViewModel() {
                     email = email
                 )
                 dao.insertUser(newUser)
-                true
+                val userId = dao.getUserByUsernameAndPassword(username, password)?.id ?: throw Exception("Lỗi khi tạo người dùng")
+                Result.success(userId)
             } else {
-                false
+                Result.failure(Exception("Người dùng đã tồn tại"))
             }
         } catch (ex: Throwable) {
-            false
+            Result.failure(ex)
         }
     }
 }
