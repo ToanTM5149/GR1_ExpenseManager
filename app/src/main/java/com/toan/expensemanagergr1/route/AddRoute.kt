@@ -7,8 +7,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.toan.expensemanagergr1.ui.screens.Login
-import com.toan.expensemanagergr1.ui.screens.Signup
+import com.toan.expensemanagergr1.ui.screens.loginandsignup.Login
+import com.toan.expensemanagergr1.ui.screens.loginandsignup.Signup
 import com.toan.expensemanagergr1.ui.screens.user.AddExpense
 import com.toan.expensemanagergr1.ui.screens.user.Profile
 import com.toan.expensemanagergr1.ui.screens.user.TotalInfo

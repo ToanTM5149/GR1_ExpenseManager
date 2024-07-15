@@ -1,4 +1,4 @@
-package com.toan.expensemanagergr1.data
+package com.toan.expensemanagergr1.data.db
 
 import android.content.Context
 import androidx.room.Database

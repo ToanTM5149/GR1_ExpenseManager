@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
+        <item name="android:windowSplashScreenBackground">@color/teal_700</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_invite</item>
+        <item name="android:windowSplashScreenAnimationDuration">1000</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/white</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/ic_income</item>
+<!--        <item name="android:windowSplashScreenBehavior">icon_preferred</item>-->
+    </style>
+
+
+
+
+</resources>

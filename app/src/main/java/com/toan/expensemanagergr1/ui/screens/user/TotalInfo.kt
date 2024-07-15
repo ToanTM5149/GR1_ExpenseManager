@@ -27,10 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,10 +45,9 @@ import androidx.navigation.compose.rememberNavController
 import com.toan.expensemanagergr1.R
 import com.toan.expensemanagergr1.ui.theme.Zinc
 import com.toan.expensemanagergr1.ui.theme.Zinc1
-import com.toan.expensemanagergr1.viewmodel.TotalInfoViewModel
-import com.toan.expensemanagergr1.viewmodel.TotalInfoViewModelFactory
+import com.toan.expensemanagergr1.viewmodel.totalinfo.TotalInfoViewModel
+import com.toan.expensemanagergr1.viewmodel.totalinfo.TotalInfoViewModelFactory
 import com.toan.expensemanagergr1.widget.Ultis
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -82,7 +77,7 @@ fun TotalInfo(navController: NavController) {
                     }){
                 Column {
                     ExpenseTextView(text = "Xin chào!", fontSize = 16.sp, color = Color.White)
-                    ExpenseTextView(text = "Expense Manager App!", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    ExpenseTextView(text = "Trần Mạnh Toàn!", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.Bold)
                 }
                 Image(
                     painter = painterResource(id = R.drawable.ic_notify),

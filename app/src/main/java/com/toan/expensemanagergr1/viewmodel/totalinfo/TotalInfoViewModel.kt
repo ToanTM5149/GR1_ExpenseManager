@@ -1,6 +1,5 @@
-package com.toan.expensemanagergr1.viewmodel
+package com.toan.expensemanagergr1.viewmodel.totalinfo
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.toan.expensemanagergr1.R
 import com.toan.expensemanagergr1.widget.Ultis
-import com.toan.expensemanagergr1.data.AppDatabase
+import com.toan.expensemanagergr1.data.db.AppDatabase
 import com.toan.expensemanagergr1.data.dao.ExpenseDao
 import com.toan.expensemanagergr1.data.model.ExpenseEntity
 import com.toan.expensemanagergr1.data.model.UserWithExpenses

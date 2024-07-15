@@ -1,9 +1,9 @@
-package com.toan.expensemanagergr1.viewmodel
+package com.toan.expensemanagergr1.viewmodel.loginandsignup
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.toan.expensemanagergr1.data.AppDatabase
+import com.toan.expensemanagergr1.data.db.AppDatabase
 import com.toan.expensemanagergr1.data.dao.UserDao
 import com.toan.expensemanagergr1.data.model.UserEntity
 

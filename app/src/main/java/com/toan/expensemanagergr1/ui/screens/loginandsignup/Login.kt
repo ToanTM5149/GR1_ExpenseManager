@@ -1,11 +1,10 @@
-package com.toan.expensemanagergr1.ui.screens
+package com.toan.expensemanagergr1.ui.screens.loginandsignup
 
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,10 +23,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +41,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,23 +48,20 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.toan.expensemanagergr1.R
-import com.toan.expensemanagergr1.ui.screens.user.DataForm
-import com.toan.expensemanagergr1.ui.theme.Zinc
 import com.toan.expensemanagergr1.ui.theme.Zinc
 import com.toan.expensemanagergr1.ui.theme.Zinc1
-import com.toan.expensemanagergr1.viewmodel.SignupViewModel
-import com.toan.expensemanagergr1.viewmodel.SignupViewModelFactory
+import com.toan.expensemanagergr1.viewmodel.loginandsignup.LoginViewModel
+import com.toan.expensemanagergr1.viewmodel.loginandsignup.LoginViewModelFactory
 import com.toan.expensemanagergr1.widget.CustomOutlinedTextField
 import com.toan.expensemanagergr1.widget.ExpenseTextView
 import kotlinx.coroutines.launch
 
-
 @Composable
-fun Signup(navController: NavController) {
+fun Login(navController: NavController) {
 
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (nameRow, list, card, topBar) = createRefs()
+            val (nameRow, card, topBar) = createRefs()
             Image(painter = painterResource(id = R.drawable.ic_topbar), contentDescription = null,
                 colorFilter = ColorFilter.tint(Zinc1),
                 modifier = Modifier.constrainAs(topBar) {
@@ -98,26 +90,24 @@ fun Signup(navController: NavController) {
                 }
             }
 
-            SignupForm(modifier = Modifier
+            LoginForm(modifier = Modifier
                 .padding(top = 110.dp)
                 .constrainAs(card) {
                     top.linkTo(nameRow.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }, navController)
-
         }
     }
 }
 
 @Composable
-fun SignupForm(modifier: Modifier, navController: NavController) {
+fun LoginForm(modifier: Modifier, navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
     val context = LocalContext.current
-    val viewModel: SignupViewModel = remember {
-        SignupViewModelFactory(context).create(SignupViewModel::class.java)
+    val viewModel: LoginViewModel = remember {
+        LoginViewModelFactory(context).create(LoginViewModel::class.java)
     }
     val coroutineScope = rememberCoroutineScope()
 
@@ -131,7 +121,7 @@ fun SignupForm(modifier: Modifier, navController: NavController) {
         .padding(16.dp)
         .verticalScroll(rememberScrollState())
     ) {
-        ExpenseTextView(text = "Đăng ký", fontSize = 30.sp, fontWeight = FontWeight.Bold,
+        ExpenseTextView(text = "Đăng nhập", fontSize = 30.sp, fontWeight = FontWeight.Bold,
             color = Zinc,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -155,19 +145,9 @@ fun SignupForm(modifier: Modifier, navController: NavController) {
             visualTransformation = PasswordVisualTransformation()
         )
 
-        CustomOutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = "Nhập lại mật khẩu",
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Lock, contentDescription = "Password")
-            },
-            visualTransformation = PasswordVisualTransformation()
-        )
-
         Button(onClick = {
             coroutineScope.launch {
-                val result = viewModel.signupUser(username, password, "user", "", "")
+                val result = viewModel.loginUser(username, password)
                 result.fold(
                     onSuccess = { id ->
                         val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -178,7 +158,7 @@ fun SignupForm(modifier: Modifier, navController: NavController) {
                         navController.navigate("/home")
                     },
                     onFailure = {
-                        Toast.makeText(context, "Người dùng đã tồn tại", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Đăng nhập thất bại", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -189,17 +169,17 @@ fun SignupForm(modifier: Modifier, navController: NavController) {
                 .padding(top = 18.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
-            Text(text = "Signup")
+            ExpenseTextView(text = "Login")
         }
-        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            ExpenseTextView(text = "Bạn đã có tài khoản?", fontSize = 16.sp, color = Zinc, fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 10.dp, end = 10.dp))
+        Row (modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            ExpenseTextView(text = "Bạn chưa có tài khoản?", fontSize = 16.sp, color = Zinc, fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 10.dp, end = 5.dp))
             Spacer(modifier = Modifier.size(2.dp))
-            ExpenseTextView(text = "Đăng nhập", fontSize = 16.sp, color = Zinc, fontStyle = FontStyle.Italic,
+            ExpenseTextView(text = "Đăng ký ngay", fontSize = 16.sp, color = Zinc, fontStyle = FontStyle.Italic,
                 modifier = Modifier
                     .padding(top = 10.dp)
                     .clickable {
-                        navController.navigate("/login")
+                        navController.navigate("/signup")
                     }
             )
         }
@@ -208,6 +188,6 @@ fun SignupForm(modifier: Modifier, navController: NavController) {
 
 @Composable
 @Preview(showBackground = true)
-fun SignupPreview() {
-    Signup(rememberNavController())
+fun LoginPreview() {
+    Login(rememberNavController())
 }

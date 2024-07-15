@@ -54,8 +54,8 @@ import com.toan.expensemanagergr1.widget.Ultis
 import com.toan.expensemanagergr1.data.model.ExpenseEntity
 import com.toan.expensemanagergr1.ui.theme.Zinc
 import com.toan.expensemanagergr1.ui.theme.Zinc1
-import com.toan.expensemanagergr1.viewmodel.AddExpenseViewModel
-import com.toan.expensemanagergr1.viewmodel.AddExpenseViewModelFactory
+import com.toan.expensemanagergr1.viewmodel.addexpense.AddExpenseViewModel
+import com.toan.expensemanagergr1.viewmodel.addexpense.AddExpenseViewModelFactory
 import com.toan.expensemanagergr1.widget.ExpenseTextView
 import kotlinx.coroutines.launch
 

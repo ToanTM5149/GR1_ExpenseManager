@@ -1,4 +1,4 @@
-package com.toan.expensemanagergr1.ui.screens
+package com.toan.expensemanagergr1.ui.screens.loginandsignup
 
 import android.content.Context
 import android.widget.Toast
@@ -23,9 +23,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,18 +51,19 @@ import androidx.navigation.compose.rememberNavController
 import com.toan.expensemanagergr1.R
 import com.toan.expensemanagergr1.ui.theme.Zinc
 import com.toan.expensemanagergr1.ui.theme.Zinc1
-import com.toan.expensemanagergr1.viewmodel.LoginViewModel
-import com.toan.expensemanagergr1.viewmodel.LoginViewModelFactory
+import com.toan.expensemanagergr1.viewmodel.loginandsignup.SignupViewModel
+import com.toan.expensemanagergr1.viewmodel.loginandsignup.SignupViewModelFactory
 import com.toan.expensemanagergr1.widget.CustomOutlinedTextField
 import com.toan.expensemanagergr1.widget.ExpenseTextView
 import kotlinx.coroutines.launch
 
+
 @Composable
-fun Login(navController: NavController) {
+fun Signup(navController: NavController) {
 
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (nameRow, card, topBar) = createRefs()
+            val (nameRow, list, card, topBar) = createRefs()
             Image(painter = painterResource(id = R.drawable.ic_topbar), contentDescription = null,
                 colorFilter = ColorFilter.tint(Zinc1),
                 modifier = Modifier.constrainAs(topBar) {
@@ -92,24 +92,26 @@ fun Login(navController: NavController) {
                 }
             }
 
-            LoginForm(modifier = Modifier
+            SignupForm(modifier = Modifier
                 .padding(top = 110.dp)
                 .constrainAs(card) {
                     top.linkTo(nameRow.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }, navController)
+
         }
     }
 }
 
 @Composable
-fun LoginForm(modifier: Modifier, navController: NavController) {
+fun SignupForm(modifier: Modifier, navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     val context = LocalContext.current
-    val viewModel: LoginViewModel = remember {
-        LoginViewModelFactory(context).create(LoginViewModel::class.java)
+    val viewModel: SignupViewModel = remember {
+        SignupViewModelFactory(context).create(SignupViewModel::class.java)
     }
     val coroutineScope = rememberCoroutineScope()
 
@@ -123,7 +125,7 @@ fun LoginForm(modifier: Modifier, navController: NavController) {
         .padding(16.dp)
         .verticalScroll(rememberScrollState())
     ) {
-        ExpenseTextView(text = "Đăng nhập", fontSize = 30.sp, fontWeight = FontWeight.Bold,
+        ExpenseTextView(text = "Đăng ký", fontSize = 30.sp, fontWeight = FontWeight.Bold,
             color = Zinc,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -147,9 +149,19 @@ fun LoginForm(modifier: Modifier, navController: NavController) {
             visualTransformation = PasswordVisualTransformation()
         )
 
+        CustomOutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = "Nhập lại mật khẩu",
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.Lock, contentDescription = "Password")
+            },
+            visualTransformation = PasswordVisualTransformation()
+        )
+
         Button(onClick = {
             coroutineScope.launch {
-                val result = viewModel.loginUser(username, password)
+                val result = viewModel.signupUser(username, password, "user", "", "")
                 result.fold(
                     onSuccess = { id ->
                         val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -160,7 +172,7 @@ fun LoginForm(modifier: Modifier, navController: NavController) {
                         navController.navigate("/home")
                     },
                     onFailure = {
-                        Toast.makeText(context, "Đăng nhập thất bại", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Người dùng đã tồn tại", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -171,17 +183,17 @@ fun LoginForm(modifier: Modifier, navController: NavController) {
                 .padding(top = 18.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
-            ExpenseTextView(text = "Login")
+            Text(text = "Signup")
         }
-        Row (modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            ExpenseTextView(text = "Bạn chưa có tài khoản?", fontSize = 16.sp, color = Zinc, fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 10.dp, end = 5.dp))
+        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            ExpenseTextView(text = "Bạn đã có tài khoản?", fontSize = 16.sp, color = Zinc, fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 10.dp, end = 10.dp))
             Spacer(modifier = Modifier.size(2.dp))
-            ExpenseTextView(text = "Đăng ký ngay", fontSize = 16.sp, color = Zinc, fontStyle = FontStyle.Italic,
+            ExpenseTextView(text = "Đăng nhập", fontSize = 16.sp, color = Zinc, fontStyle = FontStyle.Italic,
                 modifier = Modifier
                     .padding(top = 10.dp)
                     .clickable {
-                        navController.navigate("/signup")
+                        navController.navigate("/login")
                     }
             )
         }
@@ -190,6 +202,6 @@ fun LoginForm(modifier: Modifier, navController: NavController) {
 
 @Composable
 @Preview(showBackground = true)
-fun LoginPreview() {
-    Login(rememberNavController())
+fun SignupPreview() {
+    Signup(rememberNavController())
 }

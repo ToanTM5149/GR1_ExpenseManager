@@ -9,5 +9,4 @@ data class UserWithExpenses(
         parentColumn = "id",
         entityColumn = "userId"
     )
-    val expenses: List<ExpenseEntity>
-)
+    val expenses: List<ExpenseEntity>)
